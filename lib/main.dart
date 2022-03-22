@@ -61,6 +61,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget bodyPage(){
-    return Text("Ma carte GPs");
+    return GoogleMap(
+        initialCameraPosition: cameraPosition,
+      onMapCreated: (GoogleMapController control) async {
+          String styleMap = await DefaultAssetBundle.of(context).loadString("lib/style/mapStyle.json");
+          control.setMapStyle(styleMap);
+          controller.complete(control);
+      },
+      myLocationButtonEnabled: true,
+      myLocationEnabled: true,
+    );
   }
 }

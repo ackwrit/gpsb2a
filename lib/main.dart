@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 
 void main() {
   runApp(const MyApp());
@@ -41,8 +42,29 @@ class _MyHomePageState extends State<MyHomePage> {
   LatLng tourEiffel = const LatLng(48.858278, 2.29425);
   LatLng montParnasse = const LatLng(48.842036, 2.322128);
   LatLng leLouvre = const LatLng(48.861013, 2.33585);
-  CameraPosition cameraPosition =
-    CameraPosition(target:LatLng(48.858278, 2.29425),zoom: 14);
+  CameraPosition cameraPosition = CameraPosition(target:LatLng(48.858278, 2.29425),zoom: 14);
+  Position? maPosition;
+
+  Future <Position> verification() async {
+    bool service;
+    LocationPermission permission;
+    service = await Geolocator.isLocationServiceEnabled();
+    if(!service){
+       return  Future.error("La localisation n'a pa été demandé");
+    }
+    permission = await Geolocator.checkPermission();
+    if(permission ==  LocationPermission.denied){
+      permission = await Geolocator.requestPermission();
+      if(permission ==  LocationPermission.denied){
+        return Future.error("la permission a été réfusé");
+      }
+    }
+    if(permission == LocationPermission.deniedForever){
+      return Future.error("La permission sera toujours refusé");
+    }
+    return await Geolocator.getCurrentPosition();
+
+  }
 
 
 

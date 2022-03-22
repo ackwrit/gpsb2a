@@ -43,6 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
   LatLng montParnasse = const LatLng(48.842036, 2.322128);
   LatLng leLouvre = const LatLng(48.861013, 2.33585);
   CameraPosition cameraPosition = CameraPosition(target:LatLng(48.858278, 2.29425),zoom: 14);
+  CameraPosition? positionActuelle;
   Position? maPosition;
 
   Future <Position> verification() async {
@@ -66,6 +67,19 @@ class _MyHomePageState extends State<MyHomePage> {
 
   }
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    verification().then((Position gps) {
+      setState(() {
+        maPosition = gps;
+        positionActuelle = CameraPosition(target: LatLng(maPosition!.latitude,maPosition!.longitude),zoom: 16);
+      });
+    });
+  }
+
+
 
 
 
@@ -73,25 +87,56 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      appBar: AppBar(
 
-        title: Text(widget.title),
-      ),
       body: bodyPage()
 
     );
   }
 
-  Widget bodyPage(){
-    return GoogleMap(
-        initialCameraPosition: cameraPosition,
-      onMapCreated: (GoogleMapController control) async {
-          String styleMap = await DefaultAssetBundle.of(context).loadString("lib/style/mapStyle.json");
-          control.setMapStyle(styleMap);
-          controller.complete(control);
-      },
-      myLocationButtonEnabled: true,
-      myLocationEnabled: true,
+  Widget widgetContainer(){
+    return Column(
+      children: [
+        SizedBox(height: 60),
+        Container(
+          padding: EdgeInsets.all(20),
+          width: 400,
+          height: 100,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.pin_drop),
+              Text("Lat:${maPosition!.latitude} - Long: ${maPosition!.longitude}")
+            ],
+          ),
+        ),
+      ],
     );
+  }
+
+  Widget bodyPage(){
+    return Stack(
+      children: [
+        GoogleMap(
+          initialCameraPosition: positionActuelle!,
+          onMapCreated: (GoogleMapController control) async {
+            String styleMap = await DefaultAssetBundle.of(context).loadString("lib/style/mapStyle.json");
+            control.setMapStyle(styleMap);
+            controller.complete(control);
+          },
+          myLocationButtonEnabled: true,
+          myLocationEnabled: true,
+        ),
+        Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+         child: widgetContainer(),
+        )
+
+      ],
+    );
+
   }
 }
